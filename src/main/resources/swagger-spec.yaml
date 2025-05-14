@@ -1,0 +1,141 @@
+openapi: 3.0.3
+info:
+  title: Credit Card Provider API
+  description: API for managing credit cards
+  version: 1.0.0
+  contact:
+    name: Credit Card Provider Team
+    email: support@creditcardprovider.com
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Credit Cards
+    description: Operations related to credit cards
+
+paths:
+  /api/v1/cards:
+    post:
+      tags:
+        - Credit Cards
+      summary: Add a new credit card
+      description: Creates a new credit card with the provided details
+      operationId: addCard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditCardRequest'
+      responses:
+        '200':
+          description: Credit card created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditCard'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+        - Credit Cards
+      summary: Get all credit cards
+      description: Retrieves a list of all credit cards
+      operationId: getAllCards
+      responses:
+        '200':
+          description: List of credit cards retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreditCard'
+
+components:
+  schemas:
+    CreditCardRequest:
+      type: object
+      required:
+        - name
+        - cardNumber
+        - limit
+      properties:
+        name:
+          type: string
+          description: Name of the card holder
+          maxLength: 100
+          pattern: '^[a-zA-Z\\s]*$'
+          example: "John Doe"
+        cardNumber:
+          type: string
+          description: Credit card number (must pass Luhn algorithm validation)
+          pattern: '^\\d{1,19}$'
+          example: "4532015112830366"
+        limit:
+          type: number
+          format: double
+          description: Credit limit in pounds
+          minimum: 0
+          maximum: 1000000
+          example: 1000.00
+
+    CreditCard:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the credit card
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: Name of the card holder
+          example: "John Doe"
+        cardNumber:
+          type: string
+          description: Credit card number
+          example: "4532015112830366"
+        limit:
+          type: number
+          format: double
+          description: Credit limit in pounds
+          example: 1000.00
+        balance:
+          type: number
+          format: double
+          description: Current balance in pounds
+          example: 0.00
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the card was created
+          example: "2024-02-20T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the card was updated
+          example: "2024-02-20T10:30:00Z"
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: General error message
+          example: "Validation Error"
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+          description: Map of field names to error messages
+          example:
+            name: "Name is required"
+            cardNumber: "Invalid card number"
+            limit: "Limit must be positive" 
